@@ -1,5 +1,3 @@
-# README
-
 ## Description
 
 La classe `MainActivity` du package `fr.jnda.android.dexloading.sample` est conçue pour charger et exécuter du code depuis un fichier DEX (Dalvik Executable), soit à partir des assets de l'application, soit directement depuis une URL, puis l'exécuter.
