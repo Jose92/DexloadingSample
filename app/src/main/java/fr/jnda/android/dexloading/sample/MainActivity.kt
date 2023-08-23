@@ -7,18 +7,24 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.google.android.material.snackbar.Snackbar
 import dalvik.system.DexClassLoader
+import dalvik.system.InMemoryDexClassLoader
+import java.io.DataInputStream
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
+import java.net.URL
+import java.nio.ByteBuffer
 
 class MainActivity : AppCompatActivity() {
     private lateinit var mainContent: ConstraintLayout
     private val TAG = "MainActivity"
     private val dexFileName = "dexloader.dex"
     private var dexLoader: DexClassLoader? = null
+    private var inmemoryLoader: InMemoryDexClassLoader? = null
+    private val githubUrlDex = "https://github.com/Jose92/DexloadingSample/raw/master/app/src/main/assets/dexloader.dex"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,13 +35,13 @@ class MainActivity : AppCompatActivity() {
             loadDex()
         }
         findViewById<Button>(R.id.btn_inmemory).setOnClickListener {
-
+            loadInMemory()
         }
         findViewById<Button>(R.id.btn_execute_dex).setOnClickListener {
             executeDex()
         }
         findViewById<Button>(R.id.btn_execute_memory).setOnClickListener {
-
+            executeInMemory()
         }
     }
 
@@ -63,7 +69,7 @@ class MainActivity : AppCompatActivity() {
             showError(getString(R.string.dexNotFound))
         }  catch (e: Exception){
             Log.d(TAG, "executeDex: $e ")
-            e.message?.let { showError(it) }
+            e.message?.let { showError("Dex-$it") }
         }
     }
     private fun executeDex() {
@@ -75,7 +81,7 @@ class MainActivity : AppCompatActivity() {
                 val cl_in = loadClass.newInstance()
                 val text = checkMethod.invoke(cl_in) as String
                 Log.d(TAG, "executeDex: $text")
-                showError("Valeur random de text $text ( depuis le fichier dex )")
+                showError("Valeur random de text dex-$text ( depuis le fichier dex )")
             } catch (e: ClassNotFoundException) {
                 showError("La classe recherchée n'existe pas")
             } catch (e: Exception) {
@@ -116,6 +122,49 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadInMemory(){
-
+        Thread {
+            try {
+                inmemoryLoader = downloadFileToByteBuffer()?.let { InMemoryDexClassLoader(it, this.javaClass.classLoader) }
+                showError("In memory chargé avec succès")
+            } catch (e: Exception) {
+                Log.d(TAG, "executeDex: $e ")
+                e.message?.let { showError(it) }
+            }
+        }.start()
+    }
+    private fun downloadFileToByteBuffer(): ByteBuffer? {
+        return try {
+            val url = URL(githubUrlDex)
+            val connection = url.openConnection()
+            val length = connection.contentLength
+            val data = ByteArray(length)
+            val stream = DataInputStream(url.openStream())
+            stream.readFully(data)
+            stream.close()
+            ByteBuffer.wrap(data)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+    private fun executeInMemory(){
+        inmemoryLoader?.let {dx ->
+            try {
+                val loadClass =
+                    dx.loadClass("fr.jnda.android.dexloading.payload.StringValue")
+                val checkMethod = loadClass.getMethod("generateRandomString")
+                val cl_in = loadClass.newInstance()
+                val text = checkMethod.invoke(cl_in) as String
+                Log.d(TAG, "executeInMemory: $text")
+                showError("Valeur random de text Memory-$text ( depuis la mémoire )")
+            } catch (e: ClassNotFoundException) {
+                showError("La classe recherchée n'existe pas")
+            } catch (e: Exception) {
+                Log.d(TAG, "executeDex: $e ")
+                e.message?.let { showError("Memory-$it") }
+            }
+        }?: kotlin.run {
+            showError("Le fichier n'est pas chargé en mémoire")
+        }
     }
 }
