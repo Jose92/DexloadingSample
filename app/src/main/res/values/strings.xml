@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">DexloadingSample</string>
+    <string name="dexloading">Load</string>
+    <string name="dexloading_execute">Execute</string>
+    <string name="inmemory">"Load"</string>
+    <string name="inmemory_execute">"Execute"</string>
+    <string name="lbl_dexloading">DexClassLoader</string>
+    <string name="lbl_inmemory">InMemoryDexClassLoader</string>
+    <string name="dexNotFound">Le fichier dex n\'a pas été trouvé</string>
+
+</resources>
