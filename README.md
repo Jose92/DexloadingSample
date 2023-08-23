@@ -39,3 +39,6 @@ Des messages de réussite ou d'erreur sont affichés à l'utilisateur via des `S
 
 Ce code est simpliste ne gère pas ou peu les erreurs et est proposé dans un but de démonstration
 L'utilisation de chargement dynamique de code, en particulier depuis des sources non fiables, peut poser des risques en matière de sécurité. Assurez-vous de bien comprendre ces risques et de prendre des mesures appropriées pour garantir la sécurité de votre application et de vos utilisateurs.
+
+
+![Alt Text](fr.jnda.android.dexloading.sample.gif)
